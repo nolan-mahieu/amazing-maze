@@ -1,116 +1,116 @@
 import os
 from PIL import Image
 
-class Solveur:
-    def __init__(self, plateau: list):
-        self.plateau = plateau
-        self.visite = False
-        self.depart, self.arrivee = self.obtenir_points_depart_arrivee()
-        self.pile = [self.depart]
+class Solver:
+    def __init__(self, board: list):
+        self.board = board
+        self.visited = False
+        self.start, self.finish = self.get_starting_finishing_points()
+        self.stack = [self.start]
         
-    def obtenir_points_depart_arrivee(self):
-        _depart = [i for i in range(len(self.plateau[0])) if self.plateau[0][i] == '.']
-        _arrivee = [i for i in range(len(self.plateau[0])) if self.plateau[len(self.plateau)-1][i] == '.']
-        return [0, _depart[0]], [len(self.plateau) - 1, _arrivee[0]]
+    def get_starting_finishing_points(self):
+        _start = [i for i in range(len(self.board[0])) if self.board[0][i] == '.']
+        _end = [i for i in range(len(self.board[0])) if self.board[len(self.board)-1][i] == '.']
+        return [0, _start[0]], [len(self.board) - 1, _end[0]]
 
-    def solveur_retour_arriere(self):
-        self.plateau[self.depart[0]][self.depart[1]] = 'o'
-        self.remonter()
+    def solver_backtracking(self):
+        self.board[self.start[0]][self.start[1]] = 'o'
+        self.backtrack()
 
-    def remonter(self):
-        while self.pile:
-            cellule_courante = self.pile[-1]
-            if cellule_courante == self.arrivee:
+    def backtrack(self):
+        while self.stack:
+            current_cell = self.stack[-1]
+            if current_cell == self.finish:
                 return
-            deplace = False
-            if cellule_courante[0] + 1 < len(self.plateau) and self.plateau[cellule_courante[0] + 1][cellule_courante[1]] == '.':
-                self.plateau[cellule_courante[0] + 1][cellule_courante[1]] = 'o'
-                self.pile.append([cellule_courante[0] + 1, cellule_courante[1]])
-                deplace = True
-            elif cellule_courante[1] + 1 < len(self.plateau[0]) and self.plateau[cellule_courante[0]][cellule_courante[1] + 1] == '.':
-                self.plateau[cellule_courante[0]][cellule_courante[1] + 1] = 'o'
-                self.pile.append([cellule_courante[0], cellule_courante[1] + 1])
-                deplace = True
-            elif cellule_courante[0] - 1 >= 0 and self.plateau[cellule_courante[0] - 1][cellule_courante[1]] == '.':
-                self.plateau[cellule_courante[0] - 1][cellule_courante[1]] = 'o'
-                self.pile.append([cellule_courante[0] - 1, cellule_courante[1]])
-                deplace = True
-            elif cellule_courante[1] - 1 >= 0 and self.plateau[cellule_courante[0]][cellule_courante[1] - 1] == '.':
-                self.plateau[cellule_courante[0]][cellule_courante[1] - 1] = 'o'
-                self.pile.append([cellule_courante[0], cellule_courante[1] - 1])
-                deplace = True
-            if not deplace:
-                cellule_a_retirer = self.pile.pop()
-                self.plateau[cellule_a_retirer[0]][cellule_a_retirer[1]] = '*'
+            moved = False
+            if current_cell[0] + 1 < len(self.board) and self.board[current_cell[0] + 1][current_cell[1]] == '.':
+                self.board[current_cell[0] + 1][current_cell[1]] = 'o'
+                self.stack.append([current_cell[0] + 1, current_cell[1]])
+                moved = True
+            elif current_cell[1] + 1 < len(self.board[0]) and self.board[current_cell[0]][current_cell[1] + 1] == '.':
+                self.board[current_cell[0]][current_cell[1] + 1] = 'o'
+                self.stack.append([current_cell[0], current_cell[1] + 1])
+                moved = True
+            elif current_cell[0] - 1 >= 0 and self.board[current_cell[0] - 1][current_cell[1]] == '.':
+                self.board[current_cell[0] - 1][current_cell[1]] = 'o'
+                self.stack.append([current_cell[0] - 1, current_cell[1]])
+                moved = True
+            elif current_cell[1] - 1 >= 0 and self.board[current_cell[0]][current_cell[1] - 1] == '.':
+                self.board[current_cell[0]][current_cell[1] - 1] = 'o'
+                self.stack.append([current_cell[0], current_cell[1] - 1])
+                moved = True
+            if not moved:
+                cell_to_remove = self.stack.pop()
+                self.board[cell_to_remove[0]][cell_to_remove[1]] = '*'
 
     def astar(self):
         pass 
 
-    def afficher_plateau(self):
-        plateau_str = ""
-        for ligne in range(len(self.plateau)):
-            plateau_str += "".join(self.plateau[ligne]) + '\n'
-        return plateau_str
+    def print_maze(self):
+        maze_str=""
+        for row in range(len(self.board)):
+            maze_str+="".join(self.board[row])+'\n'
+        return maze_str
 
-    def sauvegarder_image(self, generation: str):
-        nom = input('Entrez le nom souhaité (sans extension) : ')
+    def save_image(self, generation: str):
+        name = input('Enter the desired filename (without extension): ')
         if generation == "astar":
             pass
-        elif generation == "retour_arriere":
-            self.solveur_retour_arriere()
+        elif generation == "backtracking":
+            self.solver_backtracking()
         
-        texte_plateau = self.afficher_plateau()
-        dossier_plateau = './solveur/plateau_resolu/' + generation
-        nom_avec_tirets = nom.replace(' ', '_')
+        maze_text = self.print_maze()
+        folder_maze = './solver/maze_solved/' + generation
+        name_with_underscores = name.replace(' ', '_')
         
-        if not os.path.exists(dossier_plateau):
-            os.makedirs(dossier_plateau)
+        if not os.path.exists(folder_maze):
+            os.makedirs(folder_maze)
         
-        nom_fichier_txt = os.path.join(dossier_plateau, f'{nom_avec_tirets}.txt')
-        nom_fichier_jpg = os.path.join(dossier_plateau, f'{nom_avec_tirets}.jpg')
+        name_file_txt = os.path.join(folder_maze, f'{name_with_underscores}.txt')
+        name_file_jpg = os.path.join(folder_maze, f'{name_with_underscores}.jpg')
         
-        with open(nom_fichier_txt, 'w') as fichier:
-            fichier.write(texte_plateau)
+        with open(name_file_txt, 'w') as file:
+            file.write(maze_text)
         
-        resolution_image = (len(self.plateau[0]) * 10, len(self.plateau) * 10)
-        image_plateau = Image.new('RGB', resolution_image)
-        for x in range(len(self.plateau[0])):
-            for y in range(len(self.plateau)):
-                if self.plateau[y][x] == '#':
-                    image_plateau.paste((0, 0, 0), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
-                elif self.plateau[y][x] == 'o':
-                    image_plateau.paste((46, 139, 87), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
-                elif self.plateau[y][x] == '*':
-                    image_plateau.paste((255, 0, 0), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
+        image_resolution = (len(self.board[0]) * 10, len(self.board) * 10)
+        maze_image = Image.new('RGB', image_resolution)
+        for x in range(len(self.board[0])):
+            for y in range(len(self.board)):
+                if self.board[y][x] == '#':
+                    maze_image.paste((0, 0, 0), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
+                elif self.board[y][x] == 'o':
+                    maze_image.paste((46, 139, 87), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
+                elif self.board[y][x] == '*':
+                    maze_image.paste((255, 0, 0), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
                 else:
-                    image_plateau.paste((206, 206, 206), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
+                    maze_image.paste((206, 206, 206), (x * 10, y * 10, (x + 1) * 10, (y + 1) * 10))
 
-        image_plateau.save(nom_fichier_jpg, 'JPEG')
-        print(f'Le plateau résolu a été enregistré sous le nom {nom_fichier_txt} et {nom_fichier_jpg}')
+        maze_image.save(name_file_jpg, 'JPEG')
+        print(f'The solving maze was registered under the name {name_file_txt} and {name_file_jpg}')
 
-    def choisir_solveur(self):
+    def choosing_solver(self):
         while True:
             print(' ')
-            print("Choisissez un algorithme de résolution de labyrinthe")
-            print("1 - Algorithme A*")
-            print('2 - Algorithme de retour en arrière')
-            print('3 - Quitter')
+            print("Chooze maze solver algorithm")
+            print("1 - Astar algorithm")
+            print('2 - Backtracking algorithm')
+            print('3 - Leave')
             print(' ')
-            numero = input('Entrez un numéro > ')
+            number = input('Enter a number > ')
             print(' ')
-            if not numero.isdigit():
+            if number.isdigit() == False:
                 print(' ')
-                print('Entrez un numéro entre 1 et 2 !')
+                print('Enter a number between 1 and 2 !')
                 print(' ')
-            elif numero == "1":
-                self.sauvegarder_image("astar")
+            elif number == "1":
+                self.save_image("astar")
                 break
-            elif numero == "2":
-                self.sauvegarder_image("retour_arriere")
+            elif number == "2":
+                self.save_image("backtracking")
                 break
-            elif numero == "3":
+            elif number == "3":
                 break
             else:
                 print(' ')
-                print('Entrez un numéro valide !')
+                print('Enter a valid number !')
                 print(' ')

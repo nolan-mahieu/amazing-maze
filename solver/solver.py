@@ -1,51 +1,50 @@
 import sys
 import os
-
-dossier_racine = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(dossier_racine)
+root_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_directory)
 
 from classes.Maze import *
 from classes.Solver import *
 
-def obtenir_generateur(generation: str):
-    dossier = './generateur/labyrinthe_genere/' + generation
-    nom = input("Entrez le nom du labyrinthe à résoudre : ")
-    chemin_fichier = os.path.join(dossier, nom)
-    if not chemin_fichier.endswith(".txt"):
-        chemin_fichier += ".txt"
-    if os.path.exists(chemin_fichier):
-        with open(chemin_fichier, 'r') as fichier:
-            contenu = fichier.read()
-        lignes = contenu.split('\n')
-        plateau = [list(ligne) for ligne in lignes]
-        solveur = Solveur(plateau)
-        solveur.choisir_solveur()
+def get_generator(generation: str):
+    folder = './generator/maze_generated/' + generation
+    name = input("Enter the name of maze for solving : ")
+    path_file = os.path.join(folder, name)
+    if not path_file.endswith(".txt"):
+        path_file += ".txt"
+    if os.path.exists(path_file):
+        with open(path_file, 'r') as file:
+            content = file.read()
+        lines = content.split('\n')
+        board= [list(line) for line in lines]
+        solver = Solver(board)
+        solver.choosing_solver()
     else:
-        print(f"Le fichier {chemin_fichier} n'existe pas.")
+        print(f"The file {path_file} doesn't exist.")
 
-def demarrer():
+def start():
     while True:
         print(' ')
-        print("Choisissez la génération de votre labyrinthe")
-        print("1 - Algorithme de Kruskal")
-        print('2 - Algorithme de retour en arrière')
-        print('3 - Quitter')
+        print("Chooze your generation maze")
+        print("1 - Kruskal's algorithm")
+        print('2 - Backtracking algorithm')
+        print('3 - Leave')
         print(' ')
-        numero = input('Entrez un numéro > ')
+        number = input('Enter a number > ')
         print(' ')
-        if not numero.isdigit():
+        if number.isdigit() == False:
             print(' ')
-            print('Entrez un numéro entre 1 et 2 !')
+            print('Enter a number between 1 and 2 !')
             print(' ')
-        elif numero == "1":
-            obtenir_generateur("kruskal")
-        elif numero == "2":
-            obtenir_generateur("retour_arriere")
-        elif numero == "3":
+        elif number == "1":
+            get_generator("kruskal")
+        elif number == "2":
+            get_generator("backtracking")
+        elif number == "3":
             break
         else:
             print(' ')
-            print('Entrez un numéro valide !')
+            print('Enter a valid number !')
             print(' ')
-
-demarrer()
+            
+start()

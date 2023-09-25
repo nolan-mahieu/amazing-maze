@@ -2,104 +2,104 @@ from classes.Cell import Cell
 import random
 import os
 
-class Labyrinthe:
-    def __init__(self, nom: str, n: int):
-        self.nom = nom
+class Maze:
+    def __init__(self, name: str, n: int):
+        self.name = name
         self.n = n
-        self.grille = [[Cell((i, j)) for j in range(self.n)] for i in range(self.n)]
-        self.entree = self.get_cellule(0, 0)
-        self.ensembles = list(range(self.n * self.n))
+        self.board = [[Cell((i,j)) for j in range(self.n)] for i in range(self.n)]
+        self.entrance = self.get_cell(0,0)
+        self.sets = list(range(self.n * self.n)) 
 
-    def get_cellule(self, x: int, y: int):
-        return self.grille[x][y]
-
-    def retour_arriere(self):
-        cellule_courante = self.entree
-        cellule_courante.visitee = True
+    def get_cell(self, x: int,  y: int):
+        return self.board[x][y]
+    
+    def backtracking(self):
+        current_cell = self.entrance
+        current_cell.visited = True
         iteration = 0
-        pile = [cellule_courante]
+        stack = [current_cell]
         while iteration < self.n * self.n:
-            voisins = cellule_courante.obtenir_voisins(self.n)
-            voisins_non_visites = [voisin for voisin in voisins if not self.get_cellule(voisin[0][0], voisin[0][1]).visitee]
-            if voisins_non_visites:
-                voisin_aleatoire = random.choice(voisins_non_visites)
-                cellule_suivante = self.get_cellule(voisin_aleatoire[0][0], voisin_aleatoire[0][1])
-                direction = voisin_aleatoire[1]
-                cellule_suivante.visitee = True
-                cellule_courante.casser_mur(cellule_suivante, direction)
-                pile.append(cellule_suivante)
-                cellule_courante = cellule_suivante
+            neighbors = current_cell.get_neighbors(self.n)
+            unvisited_neighbors = [neighbor for neighbor in neighbors if not self.get_cell(neighbor[0][0], neighbor[0][1]).visited]
+            if unvisited_neighbors:
+                random_neighbor = random.choice(unvisited_neighbors)
+                next_cell = self.get_cell(random_neighbor[0][0], random_neighbor[0][1])
+                direction = random_neighbor[1]
+                next_cell.visited = True
+                current_cell.break_wall(next_cell, direction)
+                stack.append(next_cell)
+                current_cell = next_cell
             else:
-                if pile:
-                    cellule_courante = pile.pop()
-                    iteration -= 1
-                iteration += 1
+                if stack:
+                    current_cell = stack.pop()
+                    iteration -= 1                
+            iteration += 1
 
     def kruskal(self):
-        aretes = []
-        for ligne in range(self.n):
-            for colonne in range(self.n):
-                cellule = self.grille[ligne][colonne]
-                voisins = cellule.obtenir_voisins(self.n)
-                for voisin, direction in voisins:
-                    aretes.append((cellule, self.get_cellule(voisin[0], voisin[1]), direction))
-        random.shuffle(aretes)
-        for arete in aretes:
-            cellule1, cellule2, direction = arete
-            ensemble1 = self.ensembles[cellule1.pos[0] * self.n + cellule1.pos[1]]
-            ensemble2 = self.ensembles[cellule2.pos[0] * self.n + cellule2.pos[1]]
-            if ensemble1 != ensemble2:
-                ensemble_min = min(ensemble1, ensemble2)
-                ensemble_max = max(ensemble1, ensemble2)
+        edges = []
+        for row in range(self.n):
+            for col in range(self.n):
+                cell = self.board[row][col]
+                neighbors = cell.get_neighbors(self.n)
+                for neighbor, direction in neighbors:
+                    edges.append((cell, self.get_cell(neighbor[0], neighbor[1]), direction))
+        random.shuffle(edges)
+        for edge in edges:
+            cell1, cell2, direction = edge
+            set1 = self.sets[cell1.pos[0] * self.n + cell1.pos[1]]
+            set2 = self.sets[cell2.pos[0] * self.n + cell2.pos[1]]
+            if set1 != set2:
+                min_set = min(set1, set2)
+                max_set = max(set1, set2)
                 for i in range(self.n * self.n):
-                    if self.ensembles[i] == ensemble_max:
-                        self.ensembles[i] = ensemble_min
-                cellule1.casser_mur(cellule2, direction)
-                cellule1.visitee = True
-                cellule2.visitee = True
+                    if self.sets[i] == max_set:
+                        self.sets[i] = min_set
+                cell1.break_wall(cell2, direction)
+                cell1.visited = True
+                cell2.visited = True
 
-    def afficher_labyrinthe(self):
-        labyrinthe_affiche = [["#" for _ in range(2 * self.n + 1)] for _ in range(2 * self.n + 1)]
-        for ligne in range(self.n):
-            for colonne in range(self.n):
-                if self.grille[ligne][colonne].visitee:
-                    labyrinthe_affiche[2 * ligne + 1][2 * colonne + 1] = "."
-                if self.grille[ligne][colonne].murs['N']:
-                    labyrinthe_affiche[2 * ligne][2 * colonne + 1] = "#"
+    def print_maze(self):
+        maze_display = [["#" for _ in range(2 * self.n +1)] for _ in range(2 * self.n + 1)]
+        for row in range(self.n):
+            for col in range(self.n):
+                if self.board[row][col].visited == True:
+                    maze_display[2 * row + 1][2 * col + 1] = "."
+                if self.board[row][col].walls['N']:
+                    maze_display[2 * row][2 * col + 1] = "#"
                 else:
-                    labyrinthe_affiche[2 * ligne][2 * colonne + 1] = "."
-                if self.grille[ligne][colonne].murs['S']:
-                    labyrinthe_affiche[2 * ligne + 2][2 * colonne + 1] = "#"
+                    maze_display[2 * row][2 * col + 1] = "."
+                if self.board[row][col].walls['S']:
+                    maze_display[2 * row + 2][2 * col + 1] = "#"
                 else:
-                    labyrinthe_affiche[2 * ligne + 2][2 * colonne + 1] = "."
-                if self.grille[ligne][colonne].murs['O']:
-                    labyrinthe_affiche[2 * ligne + 1][2 * colonne] = "#"
+                    maze_display[2 * row + 2][2 * col + 1] = "."
+                if self.board[row][col].walls['W']:
+                    maze_display[2 * row + 1][2 * col] = "#"
                 else:
-                    labyrinthe_affiche[2 * ligne + 1][2 * colonne] = "."
-                if self.grille[ligne][colonne].murs['E']:
-                    labyrinthe_affiche[2 * ligne + 1][2 * colonne + 2] = "#"
+                    maze_display[2 * row + 1][2 * col] = "."
+                if self.board[row][col].walls['E']:
+                    maze_display[2 * row + 1][2 * col + 2] = "#"
                 else:
-                    labyrinthe_affiche[2 * ligne + 1][2 * colonne + 2] = "."
-        labyrinthe_affiche[0][0] = "."
-        labyrinthe_affiche[1][0] = "."
-        labyrinthe_affiche[2 * self.n][2 * self.n] = "."
-        labyrinthe_affiche[2 * self.n - 1][2 * self.n] = "."
-        labyrinthe_str = ""
+                    maze_display[2 * row + 1][2 * col + 2] = "."
+        maze_display[0][0] = "."
+        maze_display[1][0] = "."
+        maze_display[2*self.n][2*self.n] = "."
+        maze_display[2*self.n - 1][2*self.n] = "."
+        maze_str = ""
         count = 0
-        for ligne in labyrinthe_affiche:
-            if count == len(labyrinthe_affiche) - 1:
-                labyrinthe_str += "".join(ligne)
+        for line in maze_display:
+            if count == len(maze_display)-1:
+                maze_str += "".join(line)
             else:
-                labyrinthe_str += "".join(ligne) + '\n'
-            count += 1
-        return labyrinthe_str
-
-    def enregistrer_fichier(self, nom: str, texte_labyrinthe: str, generation: str):
-        dossier_labyrinthe = './generateur/labyrinthe_genere/' + generation
-        nom_avec_tirets = nom.replace(' ', '_')
-        if not os.path.exists(dossier_labyrinthe):
-            os.makedirs(dossier_labyrinthe)
-        nom_fichier = os.path.join(dossier_labyrinthe, f'{nom_avec_tirets}.txt')
-        with open(nom_fichier, 'w') as fichier:
-            fichier.write(texte_labyrinthe)
-        print(f'Le labyrinthe a été enregistré sous le nom {nom_fichier}')
+                maze_str += "".join(line) + '\n'
+            count+=1
+        return maze_str
+    
+    def save_file(self, name: str, maze_text: str, generation: str):
+        folder_maze = './generator/maze_generated/' + generation
+        name_with_underscores = name.replace(' ', '_')
+        if not os.path.exists(folder_maze):
+            os.makedirs(folder_maze)
+        name_file =  os.path.join(folder_maze, f'{name_with_underscores}.txt')
+        with open(name_file, 'w') as file:
+            file.write(maze_text)
+        print(f'The labyrinth was registered under the name {name_file}')

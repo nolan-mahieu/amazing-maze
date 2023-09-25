@@ -1,44 +1,43 @@
 import sys
 import os
-
-dossier_racine = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(dossier_racine)
+root_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_directory)
 from classes.Maze import *
 
-def generer_labyrinthe(generation: str):
-    nom = input('Entrez le nom souhaité (sans extension) : ')
-    taille = int(input('Entrez une taille pour le labyrinthe : '))
-    labyrinthe = Labyrinthe(nom, taille)
+def generation_maze(generation: str):
+    name = input('Enter the desired filename (without extension): ')
+    size = int(input('Enter a size for maze: '))
+    maze = Maze(name, size)
     if generation == "kruskal":
-        labyrinthe.kruskal()
-    elif generation == "retour_arriere":
-        labyrinthe.retour_arriere()
-    texte_labyrinthe = labyrinthe.afficher_labyrinthe()
-    labyrinthe.enregistrer_fichier(nom, texte_labyrinthe, generation)
+        maze.kruskal()
+    elif generation == "backtracking":
+        maze.backtracking()
+    maze_text = maze.print_maze()
+    maze.save_file(name, maze_text, generation)
 
-def demarrer():
+def start():
     while True:
         print(' ')
-        print("Choisissez un algorithme de génération de labyrinthe")
-        print("1 - Algorithme de Kruskal")
-        print('2 - Algorithme de retour en arrière')
-        print('3 - Quitter')
+        print("Chooze maze generation algorithm")
+        print("1 - Kruskal's algorithm")
+        print('2 - Backtracking algorithm')
+        print('3 - Leave')
         print(' ')
-        numero = input('Entrez un numéro > ')
+        number = input('Enter a number > ')
         print(' ')
-        if not numero.isdigit():
+        if number.isdigit() == False:
             print(' ')
-            print('Entrez un numéro entre 1 et 2 !')
+            print('Enter a number between 1 and 2 !')
             print(' ')
-        elif numero == "1":
-            generer_labyrinthe("kruskal")
-        elif numero == "2":
-            generer_labyrinthe("retour_arriere")
-        elif numero == "3":
+        elif number == "1":
+            generation_maze("kruskal")
+        elif number == "2":
+            generation_maze("backtracking")
+        elif number == "3":
             break
         else:
             print(' ')
-            print('Entrez un numéro valide !')
+            print('Enter a valid number !')
             print(' ')
-
-demarrer()
+            
+start()
